@@ -1,0 +1,2519 @@
+{
+	"info": {
+		"_postman_id": "6ec0ac59-f9f1-4195-90a0-9e7f0039491e",
+		"name": "Course work_2_KolesnikovaEkaterina",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34539393"
+	},
+	"item": [
+		{
+			"name": "Позитивные проверки",
+			"item": [
+				{
+					"name": "Расписание",
+					"item": [
+						{
+							"name": "Получение расписания",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const moment = require('moment');\r",
+											"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"today\"));\r",
+											"\r",
+											"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"future\"));\r",
+											"\r",
+											"if (!pm.variables.get('TokenGlobal')) {\r",
+											"throw new Error('Variable is expired or empty');\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept-Language",
+										"value": "ru",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/events",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"events"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Создание",
+					"item": [
+						{
+							"name": "Создание личного события",
+							"item": [
+								{
+									"name": "Создание личного события",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var key = \"eventID\"\r",
+													"var value = pm.response.json().data.payload.id\r",
+													"pm.collectionVariables.set(key, value)\r",
+													"\r",
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"var key = \"oldStartAt\"\r",
+													"var value = pm.response.json().data.startAt\r",
+													"pm.collectionVariables.set(key, value)"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"startAt\", moment().set({'hour': 14, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"startAt\"));\r",
+													"pm.collectionVariables.set(\"endAt\", moment().set({'hour': 15, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"endAt\"));\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"description\": \"Лучше никому не знать\",\r\n    \"title\": \"ЛИЧНОЕ\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/createPersonal",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"createPersonal"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Проверка создания события",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"today\"));\r",
+													"\r",
+													"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"future\"));\r",
+													"\r",
+													"if (!pm.variables.get('TokenGlobal')) {\r",
+													"throw new Error('Variable is expired or empty');\r",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Accept-Language",
+												"value": "ru",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/events",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"events"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Создание события без описания",
+							"item": [
+								{
+									"name": "Событие без описания",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var key = \"eventIDTwo\"\r",
+													"var value = pm.response.json().data.payload.id\r",
+													"pm.collectionVariables.set(key, value)\r",
+													"\r",
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"startAtTwo\", moment().set({'hour': 14, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"startAtTwo\"));\r",
+													"pm.collectionVariables.set(\"endAtTwo\", moment().set({'hour': 15, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"endAtTwo\"));"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"title\": \"ЛИЧНОЕ\",\r\n    \"startAt\": \"{{startAtTwo}}\",\r\n    \"endAt\": \"{{endAtTwo}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/createPersonal",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"createPersonal"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Проверка создания события",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"today\"));\r",
+													"\r",
+													"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"future\"));\r",
+													"\r",
+													"if (!pm.variables.get('TokenGlobal')) {\r",
+													"throw new Error('Variable is expired or empty');\r",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Accept-Language",
+												"value": "ru",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/events",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"events"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Создание события название граничное значение",
+							"item": [
+								{
+									"name": "39 символов в названии",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var key = \"eventIDThree\"\r",
+													"var value = pm.response.json().data.payload.id\r",
+													"pm.collectionVariables.set(key, value)\r",
+													"\r",
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"startAtThree\", moment().set({'hour': 14, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"startAtThree\"));\r",
+													"pm.collectionVariables.set(\"endAtThree\", moment().set({'hour': 15, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"endAtThree\"));"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"title\": \"ЛичноеЛичноеЛичноеЛичноеЛичноеЛичноеЛич\",\r\n    \"startAt\": \"{{startAtThree}}\",\r\n    \"endAt\": \"{{endAtThree}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/createPersonal",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"createPersonal"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Проверка создания события",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"today\"));\r",
+													"\r",
+													"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"future\"));\r",
+													"\r",
+													"if (!pm.variables.get('TokenGlobal')) {\r",
+													"throw new Error('Variable is expired or empty');\r",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Accept-Language",
+												"value": "ru",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/events",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"events"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Создание события граничное значение",
+							"item": [
+								{
+									"name": "40 символов в названии",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var key = \"eventIDFour\"\r",
+													"var value = pm.response.json().data.payload.id\r",
+													"pm.collectionVariables.set(key, value)\r",
+													"\r",
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"startAtFour\", moment().set({'hour': 14, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"startAtFour\"));\r",
+													"pm.collectionVariables.set(\"endAtFour\", moment().set({'hour': 15, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"endAtFour\"));"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"title\": \"ЛичноеЛичноеЛичноеЛичноеЛичноеЛичноеЛичн\",\r\n    \"startAt\": \"{{startAtFour}}\",\r\n    \"endAt\": \"{{endAtFour}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/createPersonal",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"createPersonal"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Проверка создания события",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"today\"));\r",
+													"\r",
+													"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"future\"));\r",
+													"\r",
+													"if (!pm.variables.get('TokenGlobal')) {\r",
+													"throw new Error('Variable is expired or empty');\r",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Accept-Language",
+												"value": "ru",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/events",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"events"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Редактирование",
+					"item": [
+						{
+							"name": "Название и описание",
+							"item": [
+								{
+									"name": "Изменение названия и описания события",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"var key = \"eventID\"\r",
+													"var value = pm.response.json().data.payload.id\r",
+													"pm.collectionVariables.set(key, value)\r",
+													"\r",
+													"\r",
+													"var key = \"oldStartAt\"\r",
+													"var value = pm.response.json().data.startAt\r",
+													"pm.collectionVariables.set(key, value)"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n        \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"description\": \"Лучше никому не знать\",\r\n    \"title\": \"Ну очень личное\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\",\r\n    \"id\":{{eventID}},\r\n       \"oldStartAt\": \"{{oldStartAt}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/updatePersonal",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"updatePersonal"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Проверка изменения события",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"today\"));\r",
+													"\r",
+													"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"future\"));\r",
+													"\r",
+													"if (!pm.variables.get('TokenGlobal')) {\r",
+													"throw new Error('Variable is expired or empty');\r",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Accept-Language",
+												"value": "ru",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/events",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"events"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Цвет события",
+							"item": [
+								{
+									"name": "Изменение  цвета события в розовый цвет",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"\r",
+													"var key = \"eventID\"\r",
+													"var value = pm.response.json().data.payload.id\r",
+													"pm.collectionVariables.set(key, value)\r",
+													"\r",
+													"var key = \"oldStartAt\"\r",
+													"var value = pm.response.json().data.startAt\r",
+													"pm.collectionVariables.set(key, value)"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n        \"backgroundColor\": \"#F9EBFF\",\r\n    \"color\": \"#D478F1\",\r\n    \"description\": \"Лучше никому не знать\",\r\n    \"title\": \"Ну очень личное\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\",\r\n    \"id\":{{eventID}},\r\n       \"oldStartAt\": \"{{oldStartAt}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/updatePersonal",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"updatePersonal"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Проверка изменения события",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"today\"));\r",
+													"\r",
+													"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"future\"));\r",
+													"\r",
+													"if (!pm.variables.get('TokenGlobal')) {\r",
+													"throw new Error('Variable is expired or empty');\r",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Accept-Language",
+												"value": "ru",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/events",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"events"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Дата",
+							"item": [
+								{
+									"name": "Изменение даты",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var key = \"eventID\"\r",
+													"var value = pm.response.json().data.payload.id\r",
+													"pm.collectionVariables.set(key, value)\r",
+													"\r",
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"var key = \"oldStartAt\"\r",
+													"var value = pm.response.json().data.startAt\r",
+													"pm.collectionVariables.set(key, value)\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"startAt\", moment().set({'hour': 14, 'minute': 0}).add(3, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"startAt\"));\r",
+													"pm.collectionVariables.set(\"endAt\", moment().set({'hour': 14, 'minute': 30}).add(3, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"endAt\"));"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n        \"backgroundColor\": \"#F9EBFF\",\r\n    \"color\": \"#D478F1\",\r\n    \"description\": \"Лучше никому не знать\",\r\n    \"title\": \"Ну очень личное\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\",\r\n    \"id\":{{eventID}},\r\n       \"oldStartAt\": \"{{oldStartAt}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/updatePersonal",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"updatePersonal"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Проверка изменения события",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"today\"));\r",
+													"\r",
+													"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"future\"));\r",
+													"\r",
+													"if (!pm.variables.get('TokenGlobal')) {\r",
+													"throw new Error('Variable is expired or empty');\r",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Accept-Language",
+												"value": "ru",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/events",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"events"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Время",
+							"item": [
+								{
+									"name": "Изменение времени",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"var key = \"eventID\"\r",
+													"var value = pm.response.json().data.payload.id\r",
+													"pm.collectionVariables.set(key, value)\r",
+													"\r",
+													"var key = \"oldStartAt\"\r",
+													"var value = pm.response.json().data.startAt\r",
+													"pm.collectionVariables.set(key, value)"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"startAt\", moment().set({'hour': 16, 'minute': 0}).add(3, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"startAt\"));\r",
+													"pm.collectionVariables.set(\"endAt\", moment().set({'hour': 17, 'minute': 30}).add(3, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"endAt\"));"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n        \"backgroundColor\": \"#F9EBFF\",\r\n    \"color\": \"#D478F1\",\r\n    \"description\": \"Лучше никому не знать\",\r\n    \"title\": \"Ну очень личное\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\",\r\n    \"id\":{{eventID}},\r\n       \"oldStartAt\": \"{{oldStartAt}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/updatePersonal",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"updatePersonal"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Проверка изменения события",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');\r",
+													"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"today\"));\r",
+													"\r",
+													"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+													"console.log(pm.collectionVariables.get(\"future\"));\r",
+													"\r",
+													"if (!pm.variables.get('TokenGlobal')) {\r",
+													"throw new Error('Variable is expired or empty');\r",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{TokenGlobal}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Accept-Language",
+												"value": "ru",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{BaseURL}}/v2/schedule/events",
+											"host": [
+												"{{BaseURL}}"
+											],
+											"path": [
+												"v2",
+												"schedule",
+												"events"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Удаление",
+					"item": [
+						{
+							"name": "Удаление личного события Two",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": {{eventIDTwo}},\r\n    \"startAt\": \"{{startAtTwo}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/removePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"removePersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление личного события Three",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": {{eventIDThree}},\r\n    \"startAt\": \"{{startAtThree}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/removePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"removePersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление личного события Four",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": {{eventIDFour}},\r\n    \"startAt\": \"{{startAtFour}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/removePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"removePersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Проверка удаления события",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const moment = require('moment');\r",
+											"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"today\"));\r",
+											"\r",
+											"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"future\"));\r",
+											"\r",
+											"if (!pm.variables.get('TokenGlobal')) {\r",
+											"throw new Error('Variable is expired or empty');\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept-Language",
+										"value": "ru",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/events",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"events"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Негативные проверки",
+			"item": [
+				{
+					"name": "Расписание",
+					"item": [
+						{
+							"name": "Неверный формат Дата и Время",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const moment = require('moment');\r",
+											"pm.collectionVariables.set(\"today\", moment().format(\"YYYY-MM-DD\"));\r",
+											"console.log(pm.collectionVariables.get(\"today\"));\r",
+											"\r",
+											"pm.collectionVariables.set(\"future\", moment().add(7, 'days').format(\"YYYY-MM-DD\"));\r",
+											"console.log(pm.collectionVariables.get(\"future\"));\r",
+											"\r",
+											"if (!pm.variables.get('TokenGlobal')) {\r",
+											"throw new Error('Variable is expired or empty');\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept-Language",
+										"value": "ru",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"from\": \"{{today}}\",\r\n    \"till\": \"{{future}}\",\r\n    \"jnlyTypes\": [\r\n        \"slot\",\r\n        \"event\"\r\n    ],\r\n    \"statuses\": [\r\n        \"without_status\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/events",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"events"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Создание",
+					"item": [
+						{
+							"name": "Создание события с датой один год назад",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var key = \"eventIDTwo\"\r",
+											"var value = pm.response.json().data.payload.id\r",
+											"pm.collectionVariables.set(key, value)\r",
+											"\r",
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const moment = require('moment');\r",
+											"\r",
+											"const oneYearAgo = moment().subtract(1, 'years');\r",
+											"\r",
+											"pm.collectionVariables.set(\"startAtTwo\", oneYearAgo.set({'hour': 14, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"startAtTwo\"));\r",
+											"\r",
+											"pm.collectionVariables.set(\"endAtTwo\", oneYearAgo.set({'hour': 15, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"endAtTwo\"));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"title\": \"Для теста\",\r\n    \"startAt\": \"{{startAtTwo}}\",\r\n    \"endAt\": \"{{endAtTwo}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/createPersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"createPersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Нестандартное время начала и окончания события",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var key = \"eventID\"\r",
+											"var value = pm.response.json().data.payload.id\r",
+											"pm.collectionVariables.set(key, value)\r",
+											"\r",
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"var key = \"oldStartAt\"\r",
+											"var value = pm.response.json().data.startAt\r",
+											"pm.collectionVariables.set(key, value)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const moment = require('moment');\r",
+											"pm.collectionVariables.set(\"startAt\", moment().set({'hour': 12, 'minute': 38}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"startAt\"));\r",
+											"pm.collectionVariables.set(\"endAt\", moment().set({'hour': 14, 'minute': 21}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"endAt\"));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"description\": \"Test\",\r\n    \"title\": \"Очень личное событие\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/createPersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"createPersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Событие без названия",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var key = \"eventID\"\r",
+											"var value = pm.response.json().data.payload.id\r",
+											"pm.collectionVariables.set(key, value)\r",
+											"\r",
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"var key = \"oldStartAt\"\r",
+											"var value = pm.response.json().data.startAt\r",
+											"pm.collectionVariables.set(key, value)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const moment = require('moment');\r",
+											"pm.collectionVariables.set(\"startAt\", moment().set({'hour': 14, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"startAt\"));\r",
+											"pm.collectionVariables.set(\"endAt\", moment().set({'hour': 15, 'minute': 0}).add(2, 'days').format(\"YYYY-MM-DDTHH:mm:ss+03:00\"));\r",
+											"console.log(pm.collectionVariables.get(\"endAt\"));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"description\": \"Test\",\r\n    \"title\": \"\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/createPersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"createPersonal"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Редактирование",
+					"item": [
+						{
+							"name": "Название больше 40 символов",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"var key = \"eventID\"\r",
+											"var value = pm.response.json().data.payload.id\r",
+											"pm.collectionVariables.set(key, value)\r",
+											"\r",
+											"\r",
+											"var key = \"oldStartAt\"\r",
+											"var value = pm.response.json().data.startAt\r",
+											"pm.collectionVariables.set(key, value)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"description\": \"Лучше никому не знать\",\r\n    \"title\": \"Ну очень очень очень очень очень личное событие!!!\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\",\r\n    \"id\":{{eventID}},\r\n       \"oldStartAt\": \"{{oldStartAt}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/updatePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"updatePersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Изменение цвета, которого нет в документации",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											"\r",
+											"var key = \"eventID\"\r",
+											"var value = pm.response.json().data.payload.id\r",
+											"pm.collectionVariables.set(key, value)\r",
+											"\r",
+											"\r",
+											"var key = \"oldStartAt\"\r",
+											"var value = pm.response.json().data.startAt\r",
+											"pm.collectionVariables.set(key, value)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"backgroundColor\": \"#CC2F16\",\r\n    \"color\": \"#91010D\",\r\n    \"description\": \"Лучше никому не знать\",\r\n    \"title\": \"Ну очень личное\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"endAt\": \"{{endAt}}\",\r\n    \"id\":{{eventID}},\r\n       \"oldStartAt\": \"{{oldStartAt}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/updatePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"updatePersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Без даты окончания события",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"var key = \"eventID\"\r",
+											"var value = pm.response.json().data.payload.id\r",
+											"pm.collectionVariables.set(key, value)\r",
+											"\r",
+											"\r",
+											"var key = \"oldStartAt\"\r",
+											"var value = pm.response.json().data.startAt\r",
+											"pm.collectionVariables.set(key, value)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"backgroundColor\": \"#F4F5F6\",\r\n    \"color\": \"#81888D\",\r\n    \"description\": \"Лучше никому не знать\",\r\n    \"title\": \"Ну очень личное событие!!!\",\r\n    \"startAt\": \"{{startAt}}\",\r\n    \"id\": {{eventID}},\r\n    \"oldStartAt\": \"{{oldStartAt}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/updatePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"updatePersonal"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Удаление",
+					"item": [
+						{
+							"name": "Удаление только по ID в теле запроса",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": {{eventID}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/removePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"removePersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление личного тестового события",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": {{eventID}},\r\n    \"startAt\": \"{{startAt}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/removePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"removePersonal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление личного тестового события годичной давности",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{TokenGlobal}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": {{eventIDTwo}},\r\n    \"startAt\": \"{{startAtTwo}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BaseURL}}/v2/schedule/removePersonal",
+									"host": [
+										"{{BaseURL}}"
+									],
+									"path": [
+										"v2",
+										"schedule",
+										"removePersonal"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{TokenGlobal}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BaseURL",
+			"value": "https://api-teachers.skyeng.ru",
+			"type": "string"
+		},
+		{
+			"key": "TokenGlobal",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1c2VySWQiOjE0ODk0MjUwLCJpZGVudGl0eSI6InRlc3QudHN0MzQ1QHNreWVuZy5ydSIsImlkZW50aXR5TG9naW4iOm51bGwsImlkZW50aXR5RW1haWwiOiJ0ZXN0LnRzdDM0NUBza3llbmcucnUiLCJpZGVudGl0eVBob25lIjoiKzc5MTY1MDAyMjU1IiwibmFtZSI6Ilx1MDQxMFx1MDQzYlx1MDQzNVx1MDQzYVx1MDQ0MVx1MDQzNVx1MDQzOSIsInN1cm5hbWUiOiJ0ZXN0IiwiZW1haWwiOiJ0ZXN0LnRzdDM0NUBza3llbmcucnUiLCJ1aUxhbmd1YWdlIjoicnUiLCJsb2NhbGUiOiJydSIsInNlcnZpY2VMb2NhbGUiOm51bGwsInVhcyI6MzAsImp3dFR5cGUiOjEsImp0aSI6InV0NXRIcnBHZkdSVnhseHk1Zkk5a2wyV2NaQ0cxNnJ4IiwiYnJhbmQiOm51bGwsImV4cCI6MTcxODk3NzEwMywiYmlydGhkYXkiOiIyMDA2LTEwLTEwIiwiYUlzU3Ryb25nIjp0cnVlLCJhVHlwZSI6IlVTRVJOQU1FX1BBU1NXT1JEIiwiYVRpbWUiOjE3MTg1NTY4MjksInJvbGVzIjpbIlJPTEVfVEVBQ0hFUl9DQU5ESURBVEUiLCJST0xFX1RFQUNIRVJfQ0FORElEQVRFX0JBU0VfQUNDRVNTIiwiUk9MRV9UVENfVVNBR0UiLCJST0xFX1ZJTUJPWF9URUFDSEVSX1VTQUdFIiwiUk9MRV9URUFDSEVSIiwiUk9MRV9DUk0yX1RFQUNIRVJfQUNDRVNTIiwiUk9MRV9NQVRIX1RFQUNIRVIiLCJST0xFX01BVEhfQ09OVEVOVF9USEVNRV9WSUVXIl19.bdZdNKDbGRyqryn3AhOp3cSdqQzN_R7fvd4G2sz9bR_6JE2AjmFxahQuQYOETA1mIM6USDDUgsstiKBjCAom9_m5CoXVEPCgpEkODIIqbTMUyxNFs34w2pentdENqzGV4Tac_ZRzfaAmh2JS6nUG86V-GI-Yj419JPmUeFF3aPUdSzaLAXL_mC2euvMDMjhRQ_pckFdrATEZvQ5pasdsFiFXgNeaRrN-WR0-tp-lSxj8GF2EaQFlLxyd3SZWcP4VmtoWpI5yosu9JstMtk8Q25K26t1nC7bkmPNwllDdZwtRu_iIBkcMmGdnXCr7ZL6mQ8k2MPEa6Nrdg3B2vZ9uunQwR0aV-h8d3bpsto3Tk0QySCzmF8IXC9roj31i_0kEdKk0tWTslpt5gxes4atn4ph2OLef2-ogbyrmTGibn4mYq9xA6xkHmr2AJkdYRNXvjGxjz6_D_xn4jU1eIJZlsPeRQcpUBFqc1GoC2_j7fJnrWJZPRjrScH7BSYcjnmFHNn7DX7NPem9_lJRAvJgAMF7OYCsrB7guL0fEmgU9Pu6yONbp-mu40FV0x1ZAVC5p7OpSfV1wkOTRofLkmNIrEw8FzEoNVDOYopLHR5GbBWVrUSrPQi3IJhivsZ6dD7Cr4wswysUrZprdRBVWFS_j48Z81o6IaDp_96m9cG0M4Sk",
+			"type": "string"
+		},
+		{
+			"key": "today",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "future",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "eventID",
+			"value": ""
+		},
+		{
+			"key": "eventIDTwo",
+			"value": ""
+		},
+		{
+			"key": "eventIDThree",
+			"value": ""
+		},
+		{
+			"key": "eventIDFour",
+			"value": ""
+		},
+		{
+			"key": "startAt",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "startAtTwo",
+			"value": ""
+		},
+		{
+			"key": "startAtThree",
+			"value": ""
+		},
+		{
+			"key": "startAtFour",
+			"value": ""
+		},
+		{
+			"key": "endAt",
+			"value": ""
+		},
+		{
+			"key": "endAtTwo",
+			"value": ""
+		},
+		{
+			"key": "endAtThree",
+			"value": ""
+		},
+		{
+			"key": "endAtFour",
+			"value": ""
+		},
+		{
+			"key": "oldStartAt",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
